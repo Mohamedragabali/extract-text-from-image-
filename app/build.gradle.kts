@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.example.extracttextfromimage"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.extracttextfromimage"
@@ -45,4 +45,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    implementation("com.google.android.gms:play-services-cast-framework:22.0.0")
+    implementation("com.google.android.gms:play-services-mlkit-text-recognition-common:19.1.0")
+    implementation("com.google.android.gms:play-services-mlkit-text-recognition:19.0.1")
+    implementation ("com.github.dhaval2404:imagepicker:2.1")
+
 }
