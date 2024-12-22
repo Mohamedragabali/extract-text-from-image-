@@ -1,7 +1,6 @@
 package com.example.extracttextfromimage
 
 import android.app.Activity
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
@@ -11,14 +10,13 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.io.IOException
-
-
 
 
 class MainActivity : AppCompatActivity() {
@@ -29,6 +27,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvText: TextView
     private lateinit var image: InputImage
     private lateinit var progressBar: ProgressBar
+    private val imagePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val selectedImageUri: Uri? = result.data?.data
+                selectedImageUri?.let { uri ->
+                    processImage(uri) // Your function to handle the image
+                }
+            } else {
+                Toast.makeText(this, "Task Cancelled", Toast.LENGTH_SHORT).show()
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -43,30 +53,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun openImagePicker(){
         ImagePicker.with(this)
-            .crop()	    			//Crop image(Optional), Check Customization for more option
-            .compress(1024)			//Final image size will be less than 1 MB(Optional)
-            .maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
-            .start()
-
-
-    }
-
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            //Image Uri will not be null for RESULT_OK
-            val fileUri = data?.data
-            Log.d(TAG, "onActivityResult: fileUri:"+ fileUri)
-            imgView.setImageURI(fileUri)
-
-            if(fileUri != null) {
-                processImage(fileUri)
+            .crop()                // Crop image (optional)
+            .compress(1024)        // Compress image to less than 1 MB (optional)
+            .maxResultSize(1080, 1080) // Set maximum resolution (optional)
+            .galleryOnly()         // Optional: Choose from gallery only
+            .createIntent { pickerIntent ->
+                imagePickerLauncher.launch(pickerIntent) // Pass the intent to the launcher
             }
 
-        } else {
-            Toast.makeText(this, "Task Cancelled", Toast.LENGTH_SHORT).show()
-        }
     }
     private fun processImage(fileUri: Uri){
         tvText.text = ""
